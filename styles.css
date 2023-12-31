@@ -214,7 +214,7 @@ h2{
 .error{
     display: none;
     flex-direction: column;
-    width: 550px;
+    width: 100%;
     margin: auto;
     justify-content: center;
     align-items: center;
