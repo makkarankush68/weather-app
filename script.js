@@ -13,6 +13,7 @@ let currentTab = userTab;
 currentTab.classList.add("current-tab");
 // ek kaam aur pending hai?
 // check initially if location present already and render weatherInfo
+getCountryCodejson();
 getFromSessionStorage();
 
 // switching tabs
@@ -52,13 +53,14 @@ function switchTab(clickedTab) {
 }
 
 // check if location avialable
-function getFromSessionStorage() {
+async function getFromSessionStorage() {
     errorScreen.classList.remove("active");
     const localCoordinates = sessionStorage.getItem("user-coordinates");
     if (!localCoordinates) {
         grantAccessContainer.classList.add("active");
     } else {
-        const coordinates = JSON.parse(localCoordinates);
+      console.log('user coordinates available');
+        const coordinates = await JSON.parse(localCoordinates);
         fetchUserWeatherInfo(coordinates);
     }
 }
@@ -85,6 +87,7 @@ async function fetchUserWeatherInfo(coordinates) {
     if (data?.location?.country == undefined) {
       errorScreen.classList.add("active");
     } else {
+      errorScreen.classList.remove("active");
       userInfocontainer.classList.add("active");
       renderWeatherInfo(data);
     }
@@ -111,7 +114,7 @@ function renderWeatherInfo(weatherInfo) {
   // fetch values form weather info object
   cityName.innerText = weatherInfo?.location?.name;
   let code = getCountryCode(`${weatherInfo?.location?.country}`);
-  countryIcon.src = `https://flagsapi.com/${code}/shiny/64.png`;
+  countryIcon.src = `https://flagsapi.com/${code}/flat/64.png`;
   countryIcon.alt = `${weatherInfo?.location?.country}`;
   desc.innerText = weatherInfo?.current?.condition?.text;
   weatherIcon.src = `http:${weatherInfo?.current?.condition?.icon}`;
@@ -129,7 +132,6 @@ async function getCountryCodejson(countryName) {
   countryCodesJson = data;
   // console.log(data);
 }
-getCountryCodejson();
 function getCountryCode(countryName) {
   for (let key in countryCodesJson) {
     if (countryCodesJson[key] == countryName) {
@@ -142,23 +144,20 @@ function getCountryCode(countryName) {
 
 // grant access function
 const grantAccessBtn = document.querySelector("[data-grantAccess]");
-grantAccessBtn.addEventListener("click", getLocation());
+// grantAccessBtn.addEventListener("click", clearCookieAndReload());
+function clearCookieAndReload() {
+  // Delete the cookie by setting its expiration date to a past date
+  console.log('inside cookie');
+  sessionStorage.clear();
+  // Reload the page
+  // location.reload();
+  getLocation();
+}
 function getLocation() {
   if (navigator.geolocation) {
+    console.log('in nav.geo');
     // using callback
-    // navigator.geolocation.getCurrentPosition(position());
-    // using arrow
-    navigator.geolocation.getCurrentPosition((pos) => {
-      const userCoordinates = {
-        lat: pos.coords.latitude,
-        lon: pos.coords.longitude,
-      };
-      sessionStorage.setItem(
-        "user-coordinates",
-        JSON.stringify(userCoordinates)
-      );
-      fetchUserWeatherInfo(userCoordinates);
-    });
+    navigator.geolocation.getCurrentPosition(position);
   } else {
     // make this a alert
     grantAccessContainer.classList.remove('active');
@@ -167,14 +166,14 @@ function getLocation() {
     console.log("No Location data Support");
   }
 }
-// function position(pos) {
-//   const userCoordinates = {
-//     lat: pos.coords.latitude,
-//     lon: pos.coords.longitude,
-//   };
-//   sessionStorage.setItem("user-coordinates", JSON.stringify(userCoordinates));
-//   fetchUserWeatherInfo(userCoordinates);
-// }
+function position(pos) {
+  const userCoordinates = {
+    lat: pos.coords.latitude,
+    lon: pos.coords.longitude,
+  };
+  sessionStorage.setItem("user-coordinates", JSON.stringify(userCoordinates));
+  fetchUserWeatherInfo(userCoordinates);
+}
 
 let searchInput = document.querySelector("[data-searchInput]");
 searchForm.addEventListener("submit", (e) => {
