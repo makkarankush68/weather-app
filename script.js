@@ -13,6 +13,23 @@ let currentTab = userTab;
 currentTab.classList.add("current-tab");
 // ek kaam aur pending hai?
 // check initially if location present already and render weatherInfo
+// function to get country code from country name
+let countryCodesJson = undefined;
+async function getCountryCodejson(countryName) {
+  const response = await fetch(`https://flagcdn.com/en/codes.json`);
+  const data = await response.json();
+  countryCodesJson = data;
+  // console.log(data);
+}
+function getCountryCode(countryName) {
+  for (let key in countryCodesJson) {
+    if (countryCodesJson[key] == countryName) {
+      key = key.toUpperCase();
+      // console.log(key);
+      return key;
+    }
+  }
+}
 getCountryCodejson();
 getFromSessionStorage();
 
@@ -124,35 +141,10 @@ function renderWeatherInfo(weatherInfo) {
   cloudiness.innerText = weatherInfo?.current?.cloud + "%";
 }
 
-// function to get country code from country name
-let countryCodesJson = undefined;
-async function getCountryCodejson(countryName) {
-  const response = await fetch(`https://flagcdn.com/en/codes.json`);
-  const data = await response.json();
-  countryCodesJson = data;
-  // console.log(data);
-}
-function getCountryCode(countryName) {
-  for (let key in countryCodesJson) {
-    if (countryCodesJson[key] == countryName) {
-      key = key.toUpperCase();
-      // console.log(key);
-      return key;
-    }
-  }
-}
 
 // grant access function
 const grantAccessBtn = document.querySelector("[data-grantAccess]");
-// grantAccessBtn.addEventListener("click", clearCookieAndReload());
-function clearCookieAndReload() {
-  // Delete the cookie by setting its expiration date to a past date
-  console.log('inside cookie');
-  sessionStorage.clear();
-  // Reload the page
-  // location.reload();
-  getLocation();
-}
+// grantAccessBtn.addEventListener("click", getLocation());
 function getLocation() {
   if (navigator.geolocation) {
     console.log('in nav.geo');
